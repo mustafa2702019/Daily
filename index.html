@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus 2026 | Personal Command Center</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-header: #020617;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #eab308;
+            --border: #334155;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Layout Utilities --- */
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; width: 100%; }
+        .grid { display: grid; gap: 20px; }
+        .flex { display: flex; gap: 10px; align-items: center; }
+        .flex-col { display: flex; flex-direction: column; gap: 10px; }
+        .between { justify-content: space-between; }
+        .btn {
+            background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main);
+            padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: 0.2s;
+            font-size: 0.9rem; font-weight: 500;
+        }
+        .btn:hover { background: var(--border); }
+        .btn-primary { background: var(--accent); color: #000; border: none; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-danger { color: var(--danger); border-color: var(--danger); background: transparent; }
+        .btn-danger:hover { background: var(--danger); color: white; }
+        .btn-icon { padding: 8px; border-radius: 50%; width: 36px; height: 36px; display: grid; place-items: center; }
+        
+        input, select, textarea {
+            background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-main);
+            padding: 10px; border-radius: 6px; width: 100%; outline: none;
+        }
+        input:focus, textarea:focus { border-color: var(--accent); }
+
+        /* --- Header Section --- */
+        header {
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 100;
+            padding: 15px 0;
+            box-shadow: var(--shadow);
+        }
+
+        .header-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .logo-area h1 { font-size: 1.5rem; color: var(--accent); letter-spacing: 1px; margin-bottom: 5px; }
+        .clock-display { font-variant-numeric: tabular-nums; font-size: 1.2rem; color: var(--text-muted); }
+        
+        .year-progress-container { margin-top: 10px; }
+        .progress-bar-bg { background: var(--border); height: 8px; border-radius: 4px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #818cf8); width: 0%; transition: width 0.5s; }
+        .progress-text { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; display: flex; justify-content: space-between; }
+
+        .quote-box {
+            background: var(--bg-card); padding: 15px; border-radius: var(--radius);
+            font-style: italic; text-align: center; position: relative;
+            min-height: 100px; display: flex; flex-direction: column; justify-content: center;
+        }
+        .quote-controls {
+            position: absolute; bottom: 5px; right: 5px; display: flex; gap: 5px;
+        }
+        .quote-controls button { font-size: 0.7rem; padding: 2px 6px; }
+
+        .upcoming-preview {
+            background: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent);
+            padding: 10px; border-radius: var(--radius);
+        }
+        .upcoming-item { font-size: 0.85rem; display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .upcoming-item span:last-child { font-weight: bold; color: var(--accent); }
+
+        /* --- Focus Input --- */
+        .focus-container { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; background: var(--bg-card); padding: 10px; border-radius: var(--radius); }
+        .focus-label { white-space: nowrap; font-weight: bold; color: var(--warning); }
+        .focus-input { border: none; background: transparent; font-size: 1.1rem; }
+
+        /* --- Navigation --- */
+        .nav-tabs { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 10px 25px; border-radius: 20px; border: 1px solid var(--border);
+            background: var(--bg-card); color: var(--text-muted); font-size: 1rem; cursor: pointer;
+            transition: 0.3s;
+        }
+        .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; }
+
+        /* --- Main Content Areas --- */
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* General Card Styles */
+        .card { background: var(--bg-card); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .card h2 { border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; font-size: 1.2rem; }
+        
+        /* Dashboard Grid Layouts */
+        .goals-grid, .money-grid, .schedule-grid, .daily-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        /* List Items */
+        .list-container { max-height: 500px; overflow-y: auto; padding-right: 5px; }
+        .list-container::-webkit-scrollbar { width: 6px; }
+        .list-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        .item-card {
+            background: var(--bg-dark); padding: 15px; border-radius: 8px; margin-bottom: 10px;
+            border: 1px solid var(--border); transition: 0.2s; display: flex; flex-direction: column; gap: 8px;
+        }
+        .item-card:hover { border-color: var(--accent); }
+        
+        /* Goals Specific */
+        .goal-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .goal-category { font-size: 0.75rem; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; background: var(--border); }
+        .goal-controls input[type="range"] { padding: 0; height: 6px; margin: 10px 0; cursor: pointer; }
+        .goal-stats { display: flex; gap: 10px; margin-top: 10px; background: var(--bg-dark); padding: 10px; border-radius: 8px; justify-content: center; text-align: center; }
+
+        /* Money Specific */
+        .balance-display { font-size: 2.5rem; font-weight: bold; color: var(--text-main); text-align: center; margin: 20px 0; }
+        .transaction-row { display: flex; justify-content: space-between; align-items: center; }
+        .amount { font-family: monospace; font-size: 1.1rem; font-weight: bold; }
+        .income { color: var(--success); } .expense { color: var(--danger); }
+        .category-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+        .cat-badge { font-size: 0.8rem; padding: 4px 8px; border-radius: 12px; background: var(--bg-dark); border: 1px solid var(--border); display: flex; gap: 5px; }
+        
+        /* Hobbies Specific */
+        .hobby-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .hobby-card {
+            background: var(--bg-card); border: 1px solid var(--border); padding: 15px; border-radius: 8px;
+            display: flex; flex-direction: column; gap: 10px; position: relative;
+        }
+        .hobby-card.status-interested { border-color: var(--accent); }
+        .hobby-card.status-trying { border-color: var(--warning); background: rgba(234, 179, 8, 0.05); }
+        .hobby-card.status-mastered { border-color: var(--success); background: rgba(34, 197, 94, 0.05); }
+        .status-btns { display: flex; justify-content: space-between; margin-top: 5px; }
+        .status-btn { background: transparent; border: none; font-size: 1.2rem; cursor: pointer; opacity: 0.3; transition: 0.2s; }
+        .status-btn:hover, .status-btn.active { opacity: 1; transform: scale(1.2); }
+        .hobby-filter-bar { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+
+        /* Daily Tab Specific */
+        .todo-item {
+            display: flex; align-items: center; gap: 10px; background: var(--bg-dark);
+            padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border);
+        }
+        .todo-item.completed { opacity: 0.5; text-decoration: line-through; }
+        .checkbox-custom { width: 20px; height: 20px; cursor: pointer; accent-color: var(--accent); }
+        
+        .story-container {
+            max-height: 200px; overflow-y: auto; padding-right: 10px;
+        }
+        .story-container::-webkit-scrollbar { width: 4px; }
+        .story-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        /* Footer */
+        footer { margin-top: auto; padding: 20px; text-align: center; border-top: 1px solid var(--border); background: var(--bg-header); font-size: 0.9rem; color: var(--text-muted); }
+        .data-actions { margin-top: 10px; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .header-grid { grid-template-columns: 1fr; gap: 15px; }
+            .goals-grid, .money-grid, .schedule-grid, .daily-grid { grid-template-columns: 1fr; }
+            .focus-container { flex-direction: column; align-items: stretch; }
+            .balance-display { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container header-grid">
+        <!-- Section 1: Identity & Time -->
+        <div class="logo-area">
+            <h1>NEXUS 2026</h1>
+            <div id="clock" class="clock-display">00:00:00</div>
+            <div id="date-display" style="font-size: 0.9rem; color: var(--accent);">Loading Date...</div>
+            <div class="year-progress-container">
+                <div class="progress-bar-bg">
+                    <div id="year-progress-fill" class="progress-bar-fill"></div>
+                </div>
+                <div class="progress-text">
+                    <span>2026 Progress</span>
+                    <span id="year-progress-text">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Quote & Focus -->
+        <div class="middle-area">
+            <div class="quote-box">
+                <p id="quote-text">Loading inspiration...</p>
+                <div class="quote-controls">
+                    <button class="btn" onclick="app.quotes.prev()">&#8592;</button>
+                    <button class="btn" onclick="app.quotes.reset()">Today</button>
+                    <button class="btn" onclick="app.quotes.next()">&#8594;</button>
+                </div>
+            </div>
+            <div style="margin-top: 10px;"></div>
+            <div class="focus-container">
+                <span class="focus-label">⚡ Today's Focus:</span>
+                <input type="text" id="daily-focus" class="focus-input" placeholder="What is the one thing?" oninput="app.saveFocus()">
+            </div>
+        </div>
+
+        <!-- Section 3: Upcoming -->
+        <div class="upcoming-preview" id="upcoming-preview">
+            <!-- Populated by JS -->
+            <div style="text-align: center; color: var(--text-muted);">No upcoming events</div>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="app.nav('daily')">📝 Daily</button>
+        <button class="tab-btn" onclick="app.nav('goals')">🎯 Goals</button>
+        <button class="tab-btn" onclick="app.nav('money')">💰 Money</button>
+        <button class="tab-btn" onclick="app.nav('hobbies')">🎨 Hobbies</button>
+        <button class="tab-btn" onclick="app.nav('schedule')">📅 Schedule</button>
+    </nav>
+
+    <main>
+        <!-- DAILY TAB (NEW) -->
+        <div id="tab-daily" class="tab-content active">
+            <div class="daily-grid">
+                <!-- Left Column: To-Do List -->
+                <div class="card">
+                    <h2>✅ Daily Tasks</h2>
+                    <div class="flex" style="margin-bottom: 15px;">
+                        <input type="text" id="todo-input" placeholder="Add a new task..." onkeypress="if(event.key==='Enter') app.daily.addTodo()">
+                        <button class="btn btn-primary" onclick="app.daily.addTodo()">+</button>
+                    </div>
+                    <div id="todo-list" class="list-container">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Right Column: Journal & Story -->
+                <div class="flex-col">
+                    <div class="card" style="flex: 2;">
+                        <div class="flex between">
+                            <h2>📔 Journal</h2>
+                            <span id="journal-date-display" style="font-size:0.8rem; color:var(--accent);"></span>
+                        </div>
+                        <textarea id="journal-input" 
+                                  style="width:100%; height:250px; resize:vertical; line-height:1.6; padding:15px;" 
+                                  placeholder="Write your thoughts, reflections, and gratitude for today..." 
+                                  oninput="app.daily.saveJournal()"></textarea>
+                        <div class="flex between" style="margin-top: 10px;">
+                            <small style="color:var(--text-muted)" id="journal-status">Auto-saving...</small>
+                            <!-- Future feature: View History button could go here -->
+                        </div>
+                    </div>
+
+                    <div class="card" style="flex: 1; background: rgba(234, 179, 8, 0.05); border-color: rgba(234, 179, 8, 0.2);">
+                        <h2>💡 Story of the Day</h2>
+                        <div class="story-container">
+                            <h3 id="story-title" style="margin-bottom: 8px; color: var(--warning); font-size: 1rem;"></h3>
+                            <p id="story-body" style="font-size: 0.9rem; line-height: 1.5; color: var(--text-muted);"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GOALS TAB -->
+        <div id="tab-goals" class="tab-content">
+            <div class="goals-grid">
+                <div class="card">
+                    <h2>Create New Goal</h2>
+                    <div class="flex-col">
+                        <input type="text" id="goal-title" placeholder="Goal Title (e.g., Read 20 books)">
+                        <div class="flex">
+                            <select id="goal-cat">
+                                <option value="Health">Health</option>
+                                <option value="Career">Career</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Learning">Learning</option>
+                                <option value="Social">Social</option>
+                            </select>
+                            <input type="date" id="goal-date">
+                        </div>
+                        <button class="btn btn-primary" onclick="app.goals.add()">Add Goal</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>Overview</h2>
+                    <div class="goal-stats">
+                        <div>
+                            <h3 id="goal-completion-rate">0%</h3>
+                            <small>Avg. Progress</small>
+                        </div>
+                        <div>
+                            <h3 id="goal-completed-count">0</h3>
+                            <small>Completed</small>
+                        </div>
+                        <div>
+                            <h3 id="goal-total-count">0</h3>
+                            <small>Total Goals</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card" style="margin-top: 20px;">
+                <h2>Active Goals</h2>
+                <div id="goals-list" class="list-container"></div>
+            </div>
+        </div>
+
+        <!-- MONEY TAB -->
+        <div id="tab-money" class="tab-content">
+            <div class="balance-display" id="money-balance">$0.00</div>
+            <div class="money-grid">
+                <div class="card">
+                    <h2>Add Transaction</h2>
+                    <div class="flex-col">
+                        <input type="text" id="money-desc" placeholder="Description (e.g., Grocery)">
+                        <div class="flex">
+                            <input type="number" id="money-amount" placeholder="Amount" step="0.01">
+                            <select id="money-type">
+                                <option value="expense">Expense 🔴</option>
+                                <option value="income">Income 🟢</option>
+                            </select>
+                        </div>
+                        <select id="money-cat">
+                            <option value="Food">Food</option>
+                            <option value="Rent">Rent/Bills</option>
+                            <option value="Fun">Fun/Entertainment</option>
+                            <option value="Transport">Transport</option>
+                            <option value="Income">Salary/Income</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="app.money.add()">Add Transaction</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>Breakdown</h2>
+                    <div id="money-breakdown" class="category-badges"></div>
+                </div>
+            </div>
+            <div class="card" style="margin-top: 20px;">
+                <h2>History</h2>
+                <div id="money-list" class="list-container"></div>
+            </div>
+        </div>
+
+        <!-- HOBBIES TAB -->
+        <div id="tab-hobbies" class="tab-content">
+            <div class="card">
+                <div class="flex between" style="margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                    <h2>Hobby Discovery Engine</h2>
+                    <div class="flex">
+                        <input type="text" id="hobby-search" placeholder="Search ideas..." onkeyup="app.hobbies.render()" style="width: 200px;">
+                        <button class="btn btn-primary" onclick="document.getElementById('add-hobby-modal').style.display = document.getElementById('add-hobby-modal').style.display === 'none' ? 'block' : 'none'">+ Custom</button>
+                    </div>
+                </div>
+                
+                <div id="add-hobby-modal" style="display:none; background: var(--bg-dark); padding: 15px; margin-bottom: 15px; border-radius: 8px;">
+                    <div class="flex">
+                        <input type="text" id="custom-hobby-name" placeholder="Hobby Name">
+                        <select id="custom-hobby-cat">
+                            <option value="Creative">Creative</option>
+                            <option value="Active">Active</option>
+                            <option value="Learning">Learning</option>
+                            <option value="Relaxing">Relaxing</option>
+                        </select>
+                        <button class="btn" onclick="app.hobbies.addCustom()">Add</button>
+                    </div>
+                </div>
+
+                <div class="hobby-filter-bar">
+                    <button class="btn active" onclick="app.hobbies.filter('all', this)">All</button>
+                    <button class="btn" onclick="app.hobbies.filter('interested', this)">✨ Interested</button>
+                    <button class="btn" onclick="app.hobbies.filter('trying', this)">🔥 Trying</button>
+                    <button class="btn" onclick="app.hobbies.filter('mastered', this)">🏆 Mastered</button>
+                </div>
+
+                <div id="hobbies-list" class="hobby-grid"></div>
+            </div>
+        </div>
+
+        <!-- SCHEDULE TAB -->
+        <div id="tab-schedule" class="tab-content">
+            <div class="schedule-grid">
+                <div class="card">
+                    <h2>Add Event</h2>
+                    <div class="flex-col">
+                        <input type="text" id="event-title" placeholder="Event Title">
+                        <input type="date" id="event-date">
+                        <button class="btn btn-primary" onclick="app.schedule.add()">Add to Calendar</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>Upcoming Events</h2>
+                    <div id="schedule-list" class="list-container"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer>
+    <p>"The future depends on what you do today." — Mahatma Gandhi</p>
+    <div style="margin-top: 5px; opacity: 0.7;">
+        <small>Data stored locally in your browser. No internet required.</small>
+    </div>
+    <div class="data-actions">
+        <button class="btn" onclick="app.data.export()">📥 Export Data</button>
+        <button class="btn" onclick="document.getElementById('import-file').click()">📤 Import Data</button>
+        <input type="file" id="import-file" style="display: none;" onchange="app.data.import(this)">
+    </div>
+</footer>
+
+<script>
+    /* ----------------------------------------------------------------
+       DATA & CONFIGURATION
+    ---------------------------------------------------------------- */
+    const QUOTES = [
+        "The only way to do great work is to love what you do.",
+        "Your time is limited, don't waste it living someone else's life.",
+        "Believe you can and you're halfway there.",
+        "Don't watch the clock; do what it does. Keep going.",
+        "Act as if what you do makes a difference. It does.",
+        "Success is not final, failure is not fatal: It is the courage to continue that counts.",
+        "You are never too old to set another goal or to dream a new dream.",
+        "Limit your 'always' and your 'nevers'.",
+        "It always seems impossible until it's done.",
+        "Start where you are. Use what you have. Do what you can.",
+        "The secret of getting ahead is getting started.",
+        "Quality is not an act, it is a habit.",
+        "There is no substitute for hard work.",
+        "What you do today can improve all your tomorrows.",
+        "Well done is better than well said.",
+        "A year from now you may wish you had started today.",
+        "Do one thing every day that scares you.",
+        "The best way to predict the future is to create it.",
+        "Happiness depends upon ourselves.",
+        "Discipline is doing what needs to be done, even if you don't want to.",
+        "Action is the foundational key to all success.",
+        "Don't wait. The time will never be just right.",
+        "Everything you can imagine is real.",
+        "Simplicity is the ultimate sophistication.",
+        "Tough times never last but tough people do.",
+        "Focus on being productive instead of busy."
+    ];
+
+    const INSPIRING_STORIES = [
+        {
+            title: "The Starfish Story",
+            body: "An old man was walking on the beach after a storm, finding thousands of starfish washed ashore. He saw a young boy picking them up one by one and throwing them back into the ocean. The man asked, 'Why bother? There are too many. You can't make a difference.' The boy picked up another starfish, threw it into the sea, and smiled. 'I made a difference to that one.'"
+        },
+        {
+            title: "The Bamboo Tree",
+            body: "A Chinese bamboo tree takes five years to grow. It has to be watered and fertilized every day, but it barely breaks the ground. Then, in the fifth year, it grows 90 feet in six weeks. The question is: Did it grow 90 feet in six weeks or five years? The answer is five years. If it had stopped being watered for even a day, it would have died. Persistence pays off."
+        },
+        {
+            title: "The Elephant Rope",
+            body: "A man saw elephants held by a small rope tied to their leg. They could easily break it, but they didn't. The trainer explained that when they were young, the rope was strong enough to hold them. Now that they are big, they still believe the rope can hold them, so they never try to break free. Don't let false beliefs hold you back."
+        },
+        {
+            title: "Two Wolves",
+            body: "An old Cherokee told his grandson about a battle inside everyone. 'It is between two wolves. One is Evil—anger, jealousy, greed, arrogance. The other is Good—joy, peace, love, hope, humility, kindness.' The grandson asked, 'Which wolf wins?' The old Cherokee simply replied, 'The one you feed.'"
+        },
+        {
+            title: "The Pottery Class",
+            body: "A ceramics teacher divided the class into two groups. Group A was graded on quantity (50lbs of pots = A), Group B on quality (one perfect pot = A). At grading time, the highest quality pots were all produced by the group graded for quantity. While the quantity group busily churned out piles of work—and learned from their mistakes—the quality group sat theorizing about perfection, and in the end had little to show for their efforts."
+        },
+        {
+            title: "The Rock and The Pebble",
+            body: "A professor filled a jar with rocks and asked if it was full. Students said yes. He then added pebbles, which rolled into the gaps. He asked again. They said yes. He added sand, which filled the remaining space. 'This jar represents your life. The rocks are the important things—family, health. The pebbles are other things—job, house. The sand is the small stuff. If you put the sand in first, there is no room for the rocks.'"
+        },
+        {
+            title: "Roger Bannister",
+            body: "For centuries, experts believed running a mile in under 4 minutes was impossible for the human body. Then, in 1954, Roger Bannister did it. Just 46 days later, someone else did it. Within a year, three runners broke the 4-minute barrier. Once the belief that it was impossible was shattered, everyone realized they could do it too."
+        }
+    ];
+
+    const HOBBY_DB = [
+        "Reading", "Writing", "Meditation", "Yoga", "Running", "Weightlifting", "Cycling", "Hiking", "Swimming", "Cooking",
+        "Baking", "Gardening", "Painting", "Drawing", "Sketching", "Digital Art", "Photography", "Videography", "Editing",
+        "Coding", "Web Design", "App Dev", "Robotics", "3D Printing", "Woodworking", "Metalworking", "Pottery", "Knitting",
+        "Crocheting", "Sewing", "Embroidery", "Quilting", "Origami", "Calligraphy", "Scrapbooking", "Jewelry Making",
+        "Chess", "Board Games", "Card Games", "Video Games", "Sudoku", "Crosswords", "Puzzles", "Magic Tricks", "Juggling",
+        "Guitar", "Piano", "Violin", "Drums", "Ukulele", "Singing", "Music Production", "DJing", "Podcasting",
+        "Learning a Language", "History", "Philosophy", "Astronomy", "Physics", "Math", "Biology", "Psychology",
+        "Investing", "Trading", "Personal Finance", "Real Estate", "Crypto", "Volunteering", "Mentoring", "Teaching",
+        "Public Speaking", "Debating", "Networking", "Event Planning", "Interior Design", "Fashion", "Makeup", "Skincare",
+        "Hair Styling", "Nail Art", "Tattooing", "Collecting Coins", "Collecting Stamps", "Collecting Vinyls", "Antiques",
+        "Bird Watching", "Fishing", "Camping", "Backpacking", "Rock Climbing", "Bouldering", "Surfing", "Skateboarding",
+        "Snowboarding", "Skiing", "Ice Skating", "Roller Skating", "Dancing", "Salsa", "Ballet", "Hip Hop", "Ballroom",
+        "Acting", "Improv", "Stand-up Comedy", "Filmmaking", "Animation", "Graphic Design", "UI/UX Design", "Marketing",
+        "SEO", "Copywriting", "Blogging", "Vlogging", "Streaming", "Social Media", "E-commerce", "Dropshipping",
+        "Affiliate Marketing", "Freelancing", "Consulting", "Coaching", "Therapy", "Journaling", "Planning", "Organizing",
+        "Minimalism", "Sustainability", "Zero Waste", "Veganism", "Vegetarianism", "Keto", "Paleo", "Intermittent Fasting",
+        "Biohacking", "Nootropics", "Supplements", "Herbalism", "Aromatherapy", "Massage", "Reiki", "Acupuncture",
+        "Chiropractic", "Osteopathy", "Homeopathy", "Naturopathy", "Ayurveda", "TCM", "Tai Chi", "Qigong"
+    ];
+
+    /* ----------------------------------------------------------------
+       APP LOGIC
+    ---------------------------------------------------------------- */
+    const app = {
+        data: {
+            goals: [],
+            transactions: [],
+            hobbies: [], // { name, category, status: 'none'|'interested'|'trying'|'mastered' }
+            events: [],
+            todos: [],   // { id, text, completed }
+            journal: {}, // { "YYYY-MM-DD": "content" }
+            focus: ""
+        },
+        state: {
+            currentTab: 'daily',
+            quoteIndex: 0,
+            hobbyFilter: 'all'
+        },
+
+        init: function() {
+            this.load();
+            this.setupTime();
+            this.setupHobbies(); // Ensure DB is merged with local data
+            
+            this.renderAll();
+            this.quotes.init();
+            
+            // Set input focus value
+            document.getElementById('daily-focus').value = this.data.focus || "";
+
+            // Listen for window resize if needed
+            window.app = this;
+        },
+
+        /* --- Storage & Data --- */
+        save: function() {
+            localStorage.setItem('nexus2026_data', JSON.stringify(this.data));
+            this.renderAll(); // Re-render to update UI based on new data
+        },
+        
+        load: function() {
+            const stored = localStorage.getItem('nexus2026_data');
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    // Merge parsed data with default data structure to ensure all keys exist
+                    this.data = { ...this.data, ...parsed };
+                    
+                    // Safety checks: Ensure arrays are actually arrays
+                    if (!Array.isArray(this.data.goals)) this.data.goals = [];
+                    if (!Array.isArray(this.data.transactions)) this.data.transactions = [];
+                    if (!Array.isArray(this.data.hobbies)) this.data.hobbies = [];
+                    if (!Array.isArray(this.data.events)) this.data.events = [];
+                    if (!Array.isArray(this.data.todos)) this.data.todos = [];
+                    
+                    // Robust check: Ensure journal is a valid object
+                    if (!this.data.journal || typeof this.data.journal !== 'object' || Array.isArray(this.data.journal)) {
+                        this.data.journal = {};
+                    }
+
+                    if (!this.data.focus) this.data.focus = "";
+                } catch (e) {
+                    console.error("Data load error, resetting defaults", e);
+                }
+            }
+        },
+
+        saveFocus: function() {
+            this.data.focus = document.getElementById('daily-focus').value;
+            this.save(); // Don't trigger full render, just save
+        },
+
+        /* --- Setup Helpers --- */
+        setupHobbies: function() {
+            // Merge hardcoded list with saved status
+            if (!this.data.hobbies || this.data.hobbies.length === 0) {
+                this.data.hobbies = HOBBY_DB.map(name => ({
+                    name: name,
+                    category: "General",
+                    status: "none",
+                    custom: false
+                }));
+                this.save();
+            } else {
+                const existingNames = new Set(this.data.hobbies.map(h => h.name));
+                HOBBY_DB.forEach(name => {
+                    if (!existingNames.has(name)) {
+                        this.data.hobbies.push({ name: name, category: "General", status: "none", custom: false });
+                    }
+                });
+            }
+        },
+
+        /* --- Header / Time --- */
+        setupTime: function() {
+            const updateClock = () => {
+                const now = new Date();
+                document.getElementById('clock').innerText = now.toLocaleTimeString();
+                document.getElementById('date-display').innerText = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                
+                // Year Progress
+                const start = new Date(now.getFullYear(), 0, 0);
+                const diff = now - start;
+                const oneDay = 1000 * 60 * 60 * 24;
+                const dayOfYear = Math.floor(diff / oneDay);
+                const isLeap = (year) => new Date(year, 1, 29).getMonth() === 1;
+                const totalDays = isLeap(now.getFullYear()) ? 366 : 365;
+                const percent = ((dayOfYear / totalDays) * 100).toFixed(1);
+                
+                document.getElementById('year-progress-fill').style.width = percent + '%';
+                document.getElementById('year-progress-text').innerText = percent + '%';
+            };
+            setInterval(updateClock, 1000);
+            updateClock();
+        },
+
+        quotes: {
+            init: function() {
+                const now = new Date();
+                const start = new Date(now.getFullYear(), 0, 0);
+                const day = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+                app.state.quoteIndex = day % QUOTES.length;
+                this.render();
+            },
+            render: function() {
+                document.getElementById('quote-text').innerText = `"${QUOTES[app.state.quoteIndex]}"`;
+            },
+            next: function() {
+                app.state.quoteIndex = (app.state.quoteIndex + 1) % QUOTES.length;
+                this.render();
+            },
+            prev: function() {
+                app.state.quoteIndex = (app.state.quoteIndex - 1 + QUOTES.length) % QUOTES.length;
+                this.render();
+            },
+            reset: function() {
+                this.init();
+            }
+        },
+
+        /* --- Navigation --- */
+        nav: function(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
+            const buttons = document.querySelectorAll('.tab-btn');
+            // Hardcoded index mapping
+            const map = { 'daily': 0, 'goals': 1, 'money': 2, 'hobbies': 3, 'schedule': 4 };
+            if(buttons[map[tabName]]) buttons[map[tabName]].classList.add('active');
+        },
+
+        /* --- Module: Daily (Todos, Journal, Story) --- */
+        daily: {
+            addTodo: function() {
+                const input = document.getElementById('todo-input');
+                const text = input.value.trim();
+                if(!text) return;
+                
+                app.data.todos.push({
+                    id: Date.now(),
+                    text: text,
+                    completed: false
+                });
+                input.value = "";
+                app.save();
+            },
+            toggleTodo: function(id) {
+                const t = app.data.todos.find(x => x.id === id);
+                if(t) {
+                    t.completed = !t.completed;
+                    app.save();
+                }
+            },
+            deleteTodo: function(id) {
+                app.data.todos = app.data.todos.filter(x => x.id !== id);
+                app.save();
+            },
+            saveJournal: function() {
+                const text = document.getElementById('journal-input').value;
+                // Generate YYYY-MM-DD using local time
+                const now = new Date();
+                const dateKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+                
+                // Ensure journal exists before assignment
+                if (!app.data.journal) app.data.journal = {};
+                
+                app.data.journal[dateKey] = text;
+                document.getElementById('journal-status').innerText = "Saved at " + new Date().toLocaleTimeString();
+                
+                // Silent save to avoid re-rendering entire UI and losing cursor position
+                localStorage.setItem('nexus2026_data', JSON.stringify(app.data));
+            },
+            render: function() {
+                // 1. Todos
+                const todoList = document.getElementById('todo-list');
+                todoList.innerHTML = "";
+                const todos = app.data.todos || [];
+                
+                // Sort: Pending first, then Completed
+                todos.sort((a,b) => a.completed - b.completed);
+
+                if (todos.length === 0) {
+                    todoList.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:20px;">No tasks for today. Relax!</div>`;
+                }
+
+                todos.forEach(t => {
+                    const div = document.createElement('div');
+                    div.className = `todo-item ${t.completed ? 'completed' : ''}`;
+                    div.innerHTML = `
+                        <input type="checkbox" class="checkbox-custom" ${t.completed ? 'checked' : ''} onchange="app.daily.toggleTodo(${t.id})">
+                        <span style="flex:1;">${t.text}</span>
+                        <button class="btn btn-danger btn-icon" style="width:24px; height:24px; font-size:12px;" onclick="app.daily.deleteTodo(${t.id})">&times;</button>
+                    `;
+                    todoList.appendChild(div);
+                });
+
+                // 2. Journal
+                // Use local date for key
+                const now = new Date();
+                const dateKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+                
+                document.getElementById('journal-date-display').innerText = now.toLocaleDateString();
+                
+                // Ensure journal object exists (defensive check)
+                if (!app.data.journal) app.data.journal = {};
+
+                // Only set value if element is not focused (prevent overwriting while typing if polling were involved)
+                if (document.activeElement.id !== 'journal-input') {
+                    document.getElementById('journal-input').value = app.data.journal[dateKey] || "";
+                }
+
+                // 3. Story
+                const start = new Date(now.getFullYear(), 0, 0);
+                const day = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+                const storyIndex = day % INSPIRING_STORIES.length;
+                const story = INSPIRING_STORIES[storyIndex];
+                
+                document.getElementById('story-title').innerText = story.title;
+                document.getElementById('story-body').innerText = story.body;
+            }
+        },
+
+        /* --- Module: Goals --- */
+        goals: {
+            add: function() {
+                const title = document.getElementById('goal-title').value;
+                const cat = document.getElementById('goal-cat').value;
+                const date = document.getElementById('goal-date').value;
+                if (!title) return alert("Title required");
+                
+                app.data.goals.push({
+                    id: Date.now(),
+                    title, category: cat, dueDate: date,
+                    progress: 0, completed: false
+                });
+                document.getElementById('goal-title').value = "";
+                app.save();
+            },
+            delete: function(id) {
+                if(!confirm("Delete this goal?")) return;
+                app.data.goals = app.data.goals.filter(g => g.id !== id);
+                app.save();
+            },
+            toggleComplete: function(id) {
+                const g = app.data.goals.find(g => g.id === id);
+                g.completed = !g.completed;
+                g.progress = g.completed ? 100 : g.progress;
+                app.save();
+            },
+            updateProgress: function(id, val) {
+                const g = app.data.goals.find(g => g.id === id);
+                g.progress = parseInt(val);
+                if (g.progress === 100) g.completed = true;
+                else g.completed = false;
+                app.save(); // Save triggers render, might be jumpy for slider, but ensures persistence
+            },
+            render: function() {
+                const list = document.getElementById('goals-list');
+                list.innerHTML = "";
+                
+                let totalP = 0;
+                let completedC = 0;
+
+                // Safety check
+                const goals = app.data.goals || [];
+
+                goals.forEach(g => {
+                    totalP += g.progress;
+                    if(g.completed) completedC++;
+
+                    const div = document.createElement('div');
+                    div.className = 'item-card';
+                    div.innerHTML = `
+                        <div class="goal-header">
+                            <div>
+                                <span class="goal-category">${g.category}</span>
+                                <strong>${g.title}</strong>
+                                ${g.dueDate ? `<small style="color:var(--text-muted); margin-left:5px;">Due: ${g.dueDate}</small>` : ''}
+                            </div>
+                            <button class="btn btn-danger btn-icon" onclick="app.goals.delete(${g.id})">&times;</button>
+                        </div>
+                        <div class="goal-controls">
+                            <div class="flex between" style="font-size:0.8rem; margin-bottom:5px;">
+                                <span>Progress: ${g.progress}%</span>
+                                <label><input type="checkbox" ${g.completed ? 'checked' : ''} onchange="app.goals.toggleComplete(${g.id})"> Done</label>
+                            </div>
+                            <div class="progress-bar-bg" style="height:6px; margin-bottom:5px;">
+                                <div class="progress-bar-fill" style="width:${g.progress}%"></div>
+                            </div>
+                            <input type="range" min="0" max="100" value="${g.progress}" style="width:100%" onchange="app.goals.updateProgress(${g.id}, this.value)">
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+
+                // Stats
+                const count = goals.length;
+                document.getElementById('goal-total-count').innerText = count;
+                document.getElementById('goal-completed-count').innerText = completedC;
+                document.getElementById('goal-completion-rate').innerText = count ? Math.round(totalP / count) + '%' : '0%';
+            }
+        },
+
+        /* --- Module: Money --- */
+        money: {
+            add: function() {
+                const desc = document.getElementById('money-desc').value;
+                const amount = parseFloat(document.getElementById('money-amount').value);
+                const type = document.getElementById('money-type').value;
+                const cat = document.getElementById('money-cat').value;
+
+                if (!desc || isNaN(amount)) return alert("Invalid Input");
+
+                app.data.transactions.unshift({
+                    id: Date.now(),
+                    desc, amount, type, category: cat, date: new Date().toLocaleDateString()
+                });
+                
+                document.getElementById('money-desc').value = "";
+                document.getElementById('money-amount').value = "";
+                app.save();
+            },
+            delete: function(id) {
+                if(!confirm("Delete transaction?")) return;
+                app.data.transactions = app.data.transactions.filter(t => t.id !== id);
+                app.save();
+            },
+            render: function() {
+                const list = document.getElementById('money-list');
+                const breakdownEl = document.getElementById('money-breakdown');
+                list.innerHTML = "";
+                breakdownEl.innerHTML = "";
+
+                let balance = 0;
+                let cats = {};
+
+                // Safety check
+                const transactions = app.data.transactions || [];
+
+                transactions.forEach(t => {
+                    const val = t.type === 'income' ? t.amount : -t.amount;
+                    balance += val;
+
+                    // Breakdown logic (only expenses)
+                    if(t.type === 'expense') {
+                        cats[t.category] = (cats[t.category] || 0) + t.amount;
+                    }
+
+                    const div = document.createElement('div');
+                    div.className = 'item-card transaction-row';
+                    div.style.borderLeft = `4px solid ${t.type === 'income' ? 'var(--success)' : 'var(--danger)'}`;
+                    div.innerHTML = `
+                        <div>
+                            <div><strong>${t.desc}</strong> <small class="goal-category">${t.category}</small></div>
+                            <small style="color:var(--text-muted)">${t.date}</small>
+                        </div>
+                        <div class="flex">
+                            <span class="amount ${t.type}">$${t.amount.toFixed(2)}</span>
+                            <button class="btn btn-danger btn-icon" style="width:24px; height:24px;" onclick="app.money.delete(${t.id})">&times;</button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+
+                document.getElementById('money-balance').innerText = `$${balance.toFixed(2)}`;
+                document.getElementById('money-balance').style.color = balance >= 0 ? 'var(--success)' : 'var(--danger)';
+
+                // Render Badges
+                for (const [cat, amt] of Object.entries(cats)) {
+                    const b = document.createElement('span');
+                    b.className = 'cat-badge';
+                    b.innerHTML = `${cat}: <b>$${amt.toFixed(0)}</b>`;
+                    breakdownEl.appendChild(b);
+                }
+            }
+        },
+
+        /* --- Module: Hobbies --- */
+        hobbies: {
+            addCustom: function() {
+                const name = document.getElementById('custom-hobby-name').value;
+                const cat = document.getElementById('custom-hobby-cat').value;
+                if(!name) return;
+                
+                app.data.hobbies.unshift({
+                    name: name, category: cat, status: 'interested', custom: true
+                });
+                document.getElementById('custom-hobby-name').value = "";
+                document.getElementById('add-hobby-modal').style.display = 'none';
+                app.save();
+            },
+            setStatus: function(name, status) {
+                const h = app.data.hobbies.find(x => x.name === name);
+                if(h) {
+                    h.status = h.status === status ? 'none' : status; // Toggle
+                    app.save();
+                }
+            },
+            deleteCustom: function(name) {
+                if(!confirm("Remove this hobby?")) return;
+                app.data.hobbies = app.data.hobbies.filter(h => h.name !== name);
+                app.save();
+            },
+            filter: function(type, btnElement) {
+                app.state.hobbyFilter = type;
+                
+                // Update buttons UI
+                const container = btnElement.parentElement;
+                Array.from(container.children).forEach(btn => btn.classList.remove('active'));
+                btnElement.classList.add('active');
+
+                this.render();
+            },
+            render: function() {
+                const container = document.getElementById('hobbies-list');
+                const searchInput = document.getElementById('hobby-search');
+                const search = searchInput ? searchInput.value.toLowerCase() : "";
+                container.innerHTML = "";
+
+                // Safety check
+                const hobbiesList = app.data.hobbies || [];
+
+                // 1. Filter
+                let filtered = hobbiesList.filter(h => {
+                    const matchesSearch = h.name.toLowerCase().includes(search);
+                    const matchesType = app.state.hobbyFilter === 'all' || h.status === app.state.hobbyFilter;
+                    return matchesSearch && matchesType;
+                });
+
+                // 2. Sort (Mastered -> Trying -> Interested -> None)
+                const score = { 'mastered': 3, 'trying': 2, 'interested': 1, 'none': 0 };
+                filtered.sort((a,b) => score[b.status] - score[a.status]);
+
+                filtered.forEach(h => {
+                    const div = document.createElement('div');
+                    div.className = `hobby-card status-${h.status}`;
+                    div.innerHTML = `
+                        <div class="flex between">
+                            <strong>${h.name}</strong>
+                            ${h.custom ? `<button onclick="app.hobbies.deleteCustom('${h.name}')" style="background:none;border:none;color:red;cursor:pointer;">&times;</button>` : ''}
+                        </div>
+                        <small style="color:var(--text-muted)">${h.category}</small>
+                        <div class="status-btns">
+                            <button class="status-btn ${h.status === 'interested' ? 'active' : ''}" onclick="app.hobbies.setStatus('${h.name}', 'interested')" title="Interested">✨</button>
+                            <button class="status-btn ${h.status === 'trying' ? 'active' : ''}" onclick="app.hobbies.setStatus('${h.name}', 'trying')" title="Trying">🔥</button>
+                            <button class="status-btn ${h.status === 'mastered' ? 'active' : ''}" onclick="app.hobbies.setStatus('${h.name}', 'mastered')" title="Mastered">🏆</button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+        },
+
+        /* --- Module: Schedule --- */
+        schedule: {
+            add: function() {
+                const title = document.getElementById('event-title').value;
+                const date = document.getElementById('event-date').value; // YYYY-MM-DD
+                if(!title || !date) return alert("Details required");
+
+                app.data.events.push({ id: Date.now(), title, date });
+                document.getElementById('event-title').value = "";
+                app.save();
+            },
+            delete: function(id) {
+                app.data.events = app.data.events.filter(e => e.id !== id);
+                app.save();
+            },
+            render: function() {
+                const list = document.getElementById('schedule-list');
+                const preview = document.getElementById('upcoming-preview');
+                list.innerHTML = "";
+                preview.innerHTML = "";
+
+                // Safety Check
+                const events = app.data.events || [];
+
+                // Sort by date
+                const now = new Date();
+                now.setHours(0,0,0,0);
+
+                const sorted = events
+                    .map(e => {
+                        // Fix date parsing (Dates from input are YYYY-MM-DD)
+                        // Create date object treating input as local time (midnight)
+                        const parts = e.date.split('-');
+                        const d = new Date(parts[0], parts[1]-1, parts[2]);
+                        const diffTime = d - now;
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                        return { ...e, diffDays, objDate: d };
+                    })
+                    .sort((a,b) => a.diffDays - b.diffDays);
+
+                // Populate Main List
+                sorted.forEach(e => {
+                    let timeText = "";
+                    if (e.diffDays < 0) timeText = "Passed";
+                    else if (e.diffDays === 0) timeText = "Today!";
+                    else if (e.diffDays === 1) timeText = "Tomorrow";
+                    else timeText = `${e.diffDays} days left`;
+
+                    const div = document.createElement('div');
+                    div.className = 'item-card';
+                    div.style.flexDirection = 'row';
+                    div.style.alignItems = 'center';
+                    div.style.justifyContent = 'space-between';
+                    
+                    if(e.diffDays >= 0 && e.diffDays <= 3) div.style.borderColor = 'var(--warning)';
+
+                    div.innerHTML = `
+                        <div>
+                            <strong>${e.title}</strong>
+                            <div style="font-size:0.85rem; color:var(--text-muted)">${e.objDate.toDateString()}</div>
+                        </div>
+                        <div style="text-align:right">
+                            <div style="font-weight:bold; color:${e.diffDays < 0 ? 'var(--text-muted)' : 'var(--accent)'}">${timeText}</div>
+                            <button class="btn btn-danger" style="padding:2px 8px; font-size:0.7rem; margin-top:5px;" onclick="app.schedule.delete(${e.id})">Delete</button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+
+                // Populate Header Preview (Max 3 upcoming)
+                const upcoming = sorted.filter(e => e.diffDays >= 0).slice(0, 3);
+                if (upcoming.length === 0) {
+                    preview.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.8rem;">No upcoming events</div>';
+                } else {
+                    upcoming.forEach(e => {
+                        const div = document.createElement('div');
+                        div.className = 'upcoming-item';
+                        div.innerHTML = `<span>${e.title}</span> <span>${e.diffDays === 0 ? 'Today' : e.diffDays + 'd'}</span>`;
+                        preview.appendChild(div);
+                    });
+                }
+            }
+        },
+
+        /* --- Global Render & Export --- */
+        renderAll: function() {
+            this.daily.render();
+            this.goals.render();
+            this.money.render();
+            this.hobbies.render();
+            this.schedule.render();
+        },
+
+        data: {
+            export: function() {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(app.data));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "nexus2026_backup_" + new Date().toISOString().slice(0,10) + ".json");
+                document.body.appendChild(downloadAnchorNode); // required for firefox
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+            },
+            import: function(input) {
+                const file = input.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const json = JSON.parse(e.target.result);
+                        if (confirm("This will overwrite your current data. Continue?")) {
+                            app.data = json;
+                            app.save();
+                            alert("Data imported successfully!");
+                        }
+                    } catch(err) {
+                        alert("Invalid file format.");
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+    };
+
+    // Initialize App
+    document.addEventListener('DOMContentLoaded', () => {
+        app.init();
+    });
+
+</script>
+</body>
+</html>
