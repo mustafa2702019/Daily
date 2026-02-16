@@ -19,12 +19,20 @@
             --border: #334155;
             --radius: 12px;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            /* Ayanokoji Wallpaper URL */
+            --wallpaper: url('https://www.zedge.net/wallpapers/76888308-246d-49c1-9e25-150077370355');
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         
         body {
             background-color: var(--bg-dark);
+            /* Added wallpaper with a dark overlay to ensure text is readable */
+            background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), var(--wallpaper);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
@@ -38,9 +46,11 @@
         .flex-col { display: flex; flex-direction: column; gap: 10px; }
         .between { justify-content: space-between; }
         .btn {
-            background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main);
+            background: rgba(30, 41, 59, 0.8); /* Slightly transparent */
+            border: 1px solid var(--border); color: var(--text-main);
             padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: 0.2s;
             font-size: 0.9rem; font-weight: 500;
+            backdrop-filter: blur(4px);
         }
         .btn:hover { background: var(--border); }
         .btn-primary { background: var(--accent); color: #000; border: none; }
@@ -50,14 +60,17 @@
         .btn-icon { padding: 8px; border-radius: 50%; width: 36px; height: 36px; display: grid; place-items: center; }
         
         input, select, textarea {
-            background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-main);
+            background: rgba(15, 23, 42, 0.8); /* More transparency for inputs */
+            border: 1px solid var(--border); color: var(--text-main);
             padding: 10px; border-radius: 6px; width: 100%; outline: none;
+            backdrop-filter: blur(2px);
         }
         input:focus, textarea:focus { border-color: var(--accent); }
 
         /* --- Header Section --- */
         header {
-            background: var(--bg-header);
+            background: rgba(2, 6, 23, 0.9); /* Semi-transparent header */
+            backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border);
             position: sticky; top: 0; z-index: 100;
             padding: 15px 0;
@@ -80,9 +93,11 @@
         .progress-text { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; display: flex; justify-content: space-between; }
 
         .quote-box {
-            background: var(--bg-card); padding: 15px; border-radius: var(--radius);
+            background: rgba(30, 41, 59, 0.7); /* Transparent Card */
+            padding: 15px; border-radius: var(--radius);
             font-style: italic; text-align: center; position: relative;
             min-height: 100px; display: flex; flex-direction: column; justify-content: center;
+            border: 1px solid var(--border);
         }
         .quote-controls {
             position: absolute; bottom: 5px; right: 5px; display: flex; gap: 5px;
@@ -90,14 +105,19 @@
         .quote-controls button { font-size: 0.7rem; padding: 2px 6px; }
 
         .upcoming-preview {
-            background: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent);
+            background: rgba(56, 189, 248, 0.05); border: 1px solid var(--accent);
             padding: 10px; border-radius: var(--radius);
+            backdrop-filter: blur(2px);
         }
         .upcoming-item { font-size: 0.85rem; display: flex; justify-content: space-between; margin-bottom: 4px; }
         .upcoming-item span:last-child { font-weight: bold; color: var(--accent); }
 
         /* --- Focus Input --- */
-        .focus-container { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; background: var(--bg-card); padding: 10px; border-radius: var(--radius); }
+        .focus-container { 
+            grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; 
+            background: rgba(30, 41, 59, 0.7); 
+            padding: 10px; border-radius: var(--radius); border: 1px solid var(--border);
+        }
         .focus-label { white-space: nowrap; font-weight: bold; color: var(--warning); }
         .focus-input { border: none; background: transparent; font-size: 1.1rem; }
 
@@ -105,8 +125,9 @@
         .nav-tabs { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
         .tab-btn {
             padding: 10px 25px; border-radius: 20px; border: 1px solid var(--border);
-            background: var(--bg-card); color: var(--text-muted); font-size: 1rem; cursor: pointer;
+            background: rgba(30, 41, 59, 0.8); color: var(--text-muted); font-size: 1rem; cursor: pointer;
             transition: 0.3s;
+            backdrop-filter: blur(5px);
         }
         .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; }
 
@@ -115,8 +136,13 @@
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* General Card Styles */
-        .card { background: var(--bg-card); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); }
+        /* General Card Styles - Added Transparency */
+        .card { 
+            background: rgba(30, 41, 59, 0.85); /* 85% Opacity */
+            padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); 
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(5px);
+        }
         .card h2 { border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; font-size: 1.2rem; }
         
         /* Dashboard Grid Layouts */
@@ -128,29 +154,29 @@
         .list-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
         .item-card {
-            background: var(--bg-dark); padding: 15px; border-radius: 8px; margin-bottom: 10px;
+            background: rgba(15, 23, 42, 0.6); padding: 15px; border-radius: 8px; margin-bottom: 10px;
             border: 1px solid var(--border); transition: 0.2s; display: flex; flex-direction: column; gap: 8px;
         }
-        .item-card:hover { border-color: var(--accent); }
+        .item-card:hover { border-color: var(--accent); background: rgba(15, 23, 42, 0.9); }
         
         /* Goals Specific */
         .goal-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .goal-category { font-size: 0.75rem; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; background: var(--border); }
         .goal-controls input[type="range"] { padding: 0; height: 6px; margin: 10px 0; cursor: pointer; }
-        .goal-stats { display: flex; gap: 10px; margin-top: 10px; background: var(--bg-dark); padding: 10px; border-radius: 8px; justify-content: center; text-align: center; }
+        .goal-stats { display: flex; gap: 10px; margin-top: 10px; background: rgba(15, 23, 42, 0.5); padding: 10px; border-radius: 8px; justify-content: center; text-align: center; }
 
         /* Money Specific */
-        .balance-display { font-size: 2.5rem; font-weight: bold; color: var(--text-main); text-align: center; margin: 20px 0; }
+        .balance-display { font-size: 2.5rem; font-weight: bold; color: var(--text-main); text-align: center; margin: 20px 0; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         .transaction-row { display: flex; justify-content: space-between; align-items: center; }
         .amount { font-family: monospace; font-size: 1.1rem; font-weight: bold; }
         .income { color: var(--success); } .expense { color: var(--danger); }
         .category-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
-        .cat-badge { font-size: 0.8rem; padding: 4px 8px; border-radius: 12px; background: var(--bg-dark); border: 1px solid var(--border); display: flex; gap: 5px; }
+        .cat-badge { font-size: 0.8rem; padding: 4px 8px; border-radius: 12px; background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border); display: flex; gap: 5px; }
         
         /* Hobbies Specific */
         .hobby-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
         .hobby-card {
-            background: var(--bg-card); border: 1px solid var(--border); padding: 15px; border-radius: 8px;
+            background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border); padding: 15px; border-radius: 8px;
             display: flex; flex-direction: column; gap: 10px; position: relative;
         }
         .hobby-card.status-interested { border-color: var(--accent); }
@@ -163,7 +189,7 @@
 
         /* Daily Tab Specific */
         .todo-item {
-            display: flex; align-items: center; gap: 10px; background: var(--bg-dark);
+            display: flex; align-items: center; gap: 10px; background: rgba(15, 23, 42, 0.6);
             padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border);
         }
         .todo-item.completed { opacity: 0.5; text-decoration: line-through; }
@@ -176,7 +202,7 @@
         .story-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
         /* Footer */
-        footer { margin-top: auto; padding: 20px; text-align: center; border-top: 1px solid var(--border); background: var(--bg-header); font-size: 0.9rem; color: var(--text-muted); }
+        footer { margin-top: auto; padding: 20px; text-align: center; border-top: 1px solid var(--border); background: rgba(2, 6, 23, 0.9); font-size: 0.9rem; color: var(--text-muted); backdrop-filter: blur(10px); }
         .data-actions { margin-top: 10px; }
 
         /* Responsive */
@@ -275,7 +301,7 @@
                         </div>
                     </div>
 
-                    <div class="card" style="flex: 1; background: rgba(234, 179, 8, 0.05); border-color: rgba(234, 179, 8, 0.2);">
+                    <div class="card" style="flex: 1; background: rgba(234, 179, 8, 0.1); border-color: rgba(234, 179, 8, 0.2);">
                         <h2>💡 Story of the Day</h2>
                         <div class="story-container">
                             <h3 id="story-title" style="margin-bottom: 8px; color: var(--warning); font-size: 1rem;"></h3>
@@ -378,7 +404,7 @@
                     </div>
                 </div>
                 
-                <div id="add-hobby-modal" style="display:none; background: var(--bg-dark); padding: 15px; margin-bottom: 15px; border-radius: 8px;">
+                <div id="add-hobby-modal" style="display:none; background: rgba(30, 41, 59, 0.9); padding: 15px; margin-bottom: 15px; border-radius: 8px;">
                     <div class="flex">
                         <input type="text" id="custom-hobby-name" placeholder="Hobby Name">
                         <select id="custom-hobby-cat">
@@ -564,26 +590,25 @@
             if (stored) {
                 try {
                     const parsed = JSON.parse(stored);
-                    // Merge parsed data with default data structure to ensure all keys exist
                     this.data = { ...this.data, ...parsed };
-                    
-                    // Safety checks: Ensure arrays are actually arrays
-                    if (!Array.isArray(this.data.goals)) this.data.goals = [];
-                    if (!Array.isArray(this.data.transactions)) this.data.transactions = [];
-                    if (!Array.isArray(this.data.hobbies)) this.data.hobbies = [];
-                    if (!Array.isArray(this.data.events)) this.data.events = [];
-                    if (!Array.isArray(this.data.todos)) this.data.todos = [];
-                    
-                    // Robust check: Ensure journal is a valid object
-                    if (!this.data.journal || typeof this.data.journal !== 'object' || Array.isArray(this.data.journal)) {
-                        this.data.journal = {};
-                    }
-
-                    if (!this.data.focus) this.data.focus = "";
                 } catch (e) {
-                    console.error("Data load error, resetting defaults", e);
+                    console.error("Data load error", e);
                 }
             }
+            
+            // Ensure arrays
+            this.data.goals = Array.isArray(this.data.goals) ? this.data.goals : [];
+            this.data.transactions = Array.isArray(this.data.transactions) ? this.data.transactions : [];
+            this.data.hobbies = Array.isArray(this.data.hobbies) ? this.data.hobbies : [];
+            this.data.events = Array.isArray(this.data.events) ? this.data.events : [];
+            this.data.todos = Array.isArray(this.data.todos) ? this.data.todos : [];
+            
+            // Ensure objects
+            if (!this.data.journal || typeof this.data.journal !== 'object' || Array.isArray(this.data.journal)) {
+                this.data.journal = {};
+            }
+            
+            if (!this.data.focus) this.data.focus = "";
         },
 
         saveFocus: function() {
@@ -679,6 +704,9 @@
                 const text = input.value.trim();
                 if(!text) return;
                 
+                // Fix: Ensure array exists
+                if (!app.data.todos) app.data.todos = [];
+
                 app.data.todos.push({
                     id: Date.now(),
                     text: text,
